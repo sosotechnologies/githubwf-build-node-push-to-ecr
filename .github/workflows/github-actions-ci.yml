@@ -54,14 +54,19 @@ jobs:
       run: |
         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_NUMBER }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-    - name: Tag and Push Docker image to Amazon ECR
+    - name: Fetch Git Tags
+      run: git fetch --tags
+
+    - name: Bump Version
       run: |
-        IMAGE_TAG=${{ env.NEW_VERSION }}
-        ECR_REGISTRY=${{ secrets.AWS_ACCOUNT_NUMBER }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        REPOSITORY=${{ secrets.AWS_ECR_REPO }}
+        chmod +x ./bump-version.sh
+        ./bump-version.sh
 
-        docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
-        docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:latest
-
+    - name: Build and push image Amazon ECR
+      env:
+        REGISTRY: ${{ steps.login-pf-aws-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO }}
+        IMAGE_TAG: ${{ env.NEW_VERSION }}
+      run: |
+        docker build -t $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$REPOSITORY:latest
