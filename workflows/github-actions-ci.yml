@@ -47,17 +47,21 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+        aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
+    ## OR OR  
+    # - name: Log in to Amazon ECR
+    #   run: |
+    #     aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_NUMBER }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
     - name: Tag and Push Docker image to Amazon ECR
       run: |
         IMAGE_TAG=${{ steps.bump_version.outputs.new_version }}
-        ECR_REGISTRY=368085106192.dkr.ecr.us-east-1.amazonaws.com
-        REPOSITORY=xcite
+        ECR_REGISTRY=${{ secrets.AWS_ACCOUNT_NUMBER }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+        REPOSITORY=${{ secrets.AWS_ECR_REPO }}
         docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
         docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:latest
