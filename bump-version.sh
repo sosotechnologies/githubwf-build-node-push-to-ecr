@@ -18,6 +18,9 @@ version_parts[2]=$((version_parts[2] + 1))
 # Create the new version
 new_version="${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
 
+# Write the new version to the VERSION file
+echo $new_version > VERSION
+
 # Tag the new version
 git tag "v$new_version"
 
