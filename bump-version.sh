@@ -3,8 +3,8 @@
 # Fetch tags from the remote
 git fetch --tags
 
-# Get the latest tag; if no tags are found, default to 2.2.20
-latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "2.2.20")
+# Get the latest tag; if no tags are found, default to 2.2.22
+latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "2.2.22")
 
 # Remove 'v' prefix if it exists
 latest_version=${latest_tag}
