@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: primuslearning
+  name: xcite
   labels:
-    app: primuslearning
+    app: xcite
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: primuslearning
+      app: xcite
   template:
     metadata:
       labels:
-        app: primuslearning
+        app: xcite
     spec:
       containers:
-        - name: primuslearning
-          image: 274127640471.dkr.ecr.us-east-2.amazonaws.com/primuslearning:1.1
+        - name: xcite
+          image: 274127640471.dkr.ecr.us-east-2.amazonaws.com/xcite:1.1
           imagePullPolicy: Always
           ports:
             - containerPort: 8088
