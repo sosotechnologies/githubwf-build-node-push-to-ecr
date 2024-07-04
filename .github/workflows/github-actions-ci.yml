@@ -61,5 +61,5 @@ jobs:
         REPOSITORY=${{ secrets.AWS_ECR_REPO }}
         docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
-        docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:latest
-        docker push $ECR_REGISTRY/$REPOSITORY:latest
+        # docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:latest
+        # docker push $ECR_REGISTRY/$REPOSITORY:latest
