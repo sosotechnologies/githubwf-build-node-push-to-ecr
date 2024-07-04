@@ -49,7 +49,7 @@ jobs:
 
     - name: Deploy to Docker Desktop
       run: |
-        kubectl apply -f deployment.yaml
+        kubectl apply -f deploy.yaml
         kubectl apply -f service.yaml
 
 # name: Node js app deploy to EKS
