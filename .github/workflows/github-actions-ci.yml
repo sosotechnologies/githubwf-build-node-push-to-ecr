@@ -13,14 +13,23 @@ jobs:
     steps:
     - name: Check out code
       uses: actions/checkout@v2
-
+    
     - name: Bump version
       id: bump_version
       run: |
-        chmod +x bump-version.sh
-        ./bump-version.sh
-        new_version=$(cat VERSION)
-        echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+        chmod +x bump_version.sh && ./bump-version.sh
+
+    - name: Build the Docker image
+      run: |
+        IMAGE_TAG=${{ env.NEW_VERSION }}
+        docker build -t $IMAGE_TAG .
+    # - name: Bump version
+    #   id: bump_version
+    #   run: |
+    #     chmod +x bump-version.sh
+    #     ./bump-version.sh
+    #     new_version=$(cat VERSION)
+    #     echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
 
     - name: Build the Docker image
       run: |
