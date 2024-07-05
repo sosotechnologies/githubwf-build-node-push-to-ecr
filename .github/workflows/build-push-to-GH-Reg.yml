@@ -1,0 +1,59 @@
+name: Argo CD GitOps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Push the image
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Bump version
+      id: bump_version
+      run: |
+        chmod +x build-push-to-ECR/bump_version.sh && ./build-push-to-ECR/bump_version.sh
+        new_version=$(cat VERSION)
+        echo "::set-output name=new_version::$new_version"
+
+    - name: Commit new version
+      run: |
+        git config --global user.name 'sosotechnologies'
+        git config --global user.email 'sosotech2000@gmail.com'
+        git add VERSION
+        git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
+        git push origin main
+        
+    - name: Build the Docker image
+      run: |
+        cd build-push-to-ECR
+        docker build -t ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }} .
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: '${{ steps.bump_version.outputs.new_version }}'
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'MEDIUM,HIGH,CRITICAL'
+        output: 'trivy-report.txt'
+
+    - name: Upload Trivy report
+      uses: actions/upload-artifact@v3
+      with:
+        name: trivy-report
+        path: build-push-to-ECR/trivy-report.txt
+
+    - name: Push the Docker image to GitHub Container Registry
+      run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        docker push ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }}
+        docker tag ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }} ghcr.io/${{ github.repository }}/node-app:latest
+        docker push ghcr.io/${{ github.repository }}/node-app:latest
