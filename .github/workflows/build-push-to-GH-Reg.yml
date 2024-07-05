@@ -40,13 +40,13 @@ jobs:
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: '${{ steps.bump_version.outputs.new_version }}'
+        image-ref: 'ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }}'
         format: 'table'
         exit-code: '0'
         ignore-unfixed: true
         vuln-type: 'os,library'
         severity: 'MEDIUM,HIGH,CRITICAL'
-        output: 'trivy-report.txt'
+        output: 'build-push-to-ECR/trivy-report.txt'
 
     - name: Upload Trivy report
       uses: actions/upload-artifact@v3
