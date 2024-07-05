@@ -27,8 +27,9 @@ jobs:
         git config --global user.email 'sosotech2000@gmail.com'
         git add VERSION
         git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
+        git pull --rebase origin main
         git push origin main
-        
+
     - name: Build the Docker image
       run: |
         cd build-push-to-ECR
