@@ -1,3 +1,6 @@
+## Create an ECR Repo: xcite
+call it: xcite
+
 ## Add the following variables: 
 
 AWS_ACCESS_KEY_ID
