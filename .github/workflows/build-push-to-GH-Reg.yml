@@ -26,8 +26,10 @@ jobs:
         git config --global user.name 'sosotechnologies'
         git config --global user.email 'sosotech2000@gmail.com'
         git add VERSION
-        git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
+        git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}" || echo "No changes to commit"
+        git stash
         git pull --rebase origin main
+        git stash pop || echo "No stashed changes"
         git push origin main
 
     - name: Build the Docker image
