@@ -18,14 +18,14 @@ jobs:
       id: bump_version
       run: |
         chmod +x build-push-to-gh/bump_version.sh && ./build-push-to-gh/bump_version.sh
-        new_version=$(cat VERSION)
+        new_version=$(cat VERSION-GH)
         echo "::set-output name=new_version::$new_version"
 
     - name: Commit new version
       run: |
         git config --global user.name 'sosotechnologies'
         git config --global user.email 'sosotech2000@gmail.com'
-        git add VERSION
+        git add VERSION-GH
         git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}" || echo "No changes to commit"
         git stash
         git pull --rebase origin main
