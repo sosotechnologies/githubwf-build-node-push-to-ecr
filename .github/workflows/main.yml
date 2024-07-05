@@ -13,9 +13,6 @@ jobs:
     steps:
     - name: Check out code
       uses: actions/checkout@v2
-    
-    - name: Fetch Git Tags
-      run: git fetch --tags
 
     - name: Bump version
       id: bump_version
