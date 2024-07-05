@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Check if VERSION file exists
 if [ ! -f VERSION ]; then
   echo "2.2.11" > VERSION
 fi
