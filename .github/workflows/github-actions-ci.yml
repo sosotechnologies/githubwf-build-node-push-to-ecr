@@ -1,29 +1,53 @@
-name: Node js app deploy to EKS
+name: Argo CD GitOps CI/CD
+
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  deploy:
+  build:
+    name: Build and Push the image
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
 
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v2.0
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Bump version
+      id: bump_version
+      run: |
+        chmod +x bump_version.sh && ./bump_version.sh
+        new_version=$(cat VERSION)
+        echo "::set-output name=new_version::$new_version"
+
+    - name: Build the Docker image
+      run: |
+        docker build -t ${{ steps.bump_version.outputs.new_version }} .
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
       with:
-        version: 'v1.24.0' # default is latest stable
-      id: install
+        image-ref: '${{ steps.bump_version.outputs.new_version }}'
+        format: 'table'
+        exit-code: '0'  # Change exit code to 0 to prevent pipeline failure
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'MEDIUM,HIGH,CRITICAL'
+        output: 'trivy-report.txt'  # Save the report to a file
+
+    - name: Upload Trivy report
+      uses: actions/upload-artifact@v3
+      with:
+        name: trivy-report
+        path: trivy-report.txt
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-2
+        aws-region: us-east-1
 
     - name: Login to Amazon ECR
       id: login-ecr
