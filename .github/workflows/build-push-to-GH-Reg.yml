@@ -17,7 +17,7 @@ jobs:
     - name: Bump version
       id: bump_version
       run: |
-        chmod +x build-push-to-ECR/bump_version.sh && ./build-push-to-ECR/bump_version.sh
+        chmod +x build-push-to-gh/bump_version.sh && ./build-push-to-gh/bump_version.sh
         new_version=$(cat VERSION)
         echo "::set-output name=new_version::$new_version"
 
@@ -34,7 +34,7 @@ jobs:
 
     - name: Build the Docker image
       run: |
-        cd build-push-to-ECR
+        cd build-push-to-gh
         docker build -t ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }} .
 
     - name: Run Trivy vulnerability scanner
@@ -46,13 +46,13 @@ jobs:
         ignore-unfixed: true
         vuln-type: 'os,library'
         severity: 'MEDIUM,HIGH,CRITICAL'
-        output: 'build-push-to-ECR/trivy-report.txt'
+        output: 'build-push-to-gh/trivy-report.txt'
 
     - name: Upload Trivy report
       uses: actions/upload-artifact@v3
       with:
         name: trivy-report
-        path: build-push-to-ECR/trivy-report.txt
+        path: build-push-to-gh/trivy-report.txt
 
     - name: Push the Docker image to GitHub Container Registry
       run: |
