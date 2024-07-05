@@ -17,18 +17,17 @@ jobs:
     - name: Bump version
       id: bump_version
       run: |
-        chmod +x bump_version.sh && ./bump_version.sh
-        new_version=$(cat VERSION)
-        echo "::set-output name=new_version::$new_version"
+        chmod +x bump_version.sh && ./bump-version.sh
 
     - name: Build the Docker image
       run: |
-        docker build -t ${{ steps.bump_version.outputs.new_version }} .
+        IMAGE_TAG=${{ env.NEW_VERSION }}
+        docker build -t $IMAGE_TAG .
 
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: '${{ steps.bump_version.outputs.new_version }}'
+        image-ref: '${{ env.NEW_VERSION }}'
         format: 'table'
         exit-code: '0'  # Change exit code to 0 to prevent pipeline failure
         ignore-unfixed: true
@@ -52,17 +51,17 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
-    ## OR OR  
-    # - name: Log in to Amazon ECR
-    #   run: |
-    #     aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_NUMBER }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
     - name: Tag and Push Docker image to Amazon ECR
       run: |
-        IMAGE_TAG=${{ steps.bump_version.outputs.new_version }}
+        IMAGE_TAG=${{ env.NEW_VERSION }}
         ECR_REGISTRY=${{ secrets.AWS_ACCOUNT_NUMBER }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
         REPOSITORY=${{ secrets.AWS_ECR_REPO }}
+
+        # Tag the Docker image
         docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
         docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:latest
+
+        # Push the Docker image to ECR
+        docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$REPOSITORY:latest
