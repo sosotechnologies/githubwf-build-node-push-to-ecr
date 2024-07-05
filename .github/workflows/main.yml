@@ -13,7 +13,10 @@ jobs:
     steps:
     - name: Check out code
       uses: actions/checkout@v2
-
+    
+    - name: Fetch Git Tags
+      run: git fetch --tags
+      
     - name: Bump version
       id: bump_version
       run: |
@@ -52,13 +55,23 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
+    
+    
 
-    - name: Tag and Push Docker image to Amazon ECR
+    - name: Build and push image Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-pf-aws-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO }}
+        IMAGE_TAG: ${{ env.NEW_VERSION }}
       run: |
-        IMAGE_TAG=${{ steps.bump_version.outputs.new_version }}
-        ECR_REGISTRY=368085106192.dkr.ecr.us-east-1.amazonaws.com
-        REPOSITORY=xcite
-        docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
-        docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:latest
-        docker push $ECR_REGISTRY/$REPOSITORY:latest
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    # - name: Tag and Push Docker image to Amazon ECR
+    #   run: |
+    #     IMAGE_TAG=${{ steps.bump_version.outputs.new_version }}
+    #     ECR_REGISTRY=368085106192.dkr.ecr.us-east-1.amazonaws.com
+    #     REPOSITORY=xcite
+    #     docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
+    #     docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
+    #     docker tag $IMAGE_TAG $ECR_REGISTRY/$REPOSITORY:latest
+    #     docker push $ECR_REGISTRY/$REPOSITORY:latest
