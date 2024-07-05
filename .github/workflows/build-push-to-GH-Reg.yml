@@ -48,7 +48,7 @@ jobs:
         severity: 'MEDIUM,HIGH,CRITICAL'
         output: 'build-push-to-gh/trivy-report.txt'
 
-    - name: Upload Trivy report
+    - name: package Trivy report
       uses: actions/upload-artifact@v3
       with:
         name: trivy-report
