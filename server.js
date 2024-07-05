@@ -9,17 +9,17 @@
 const express = require('express');
 
 // Constants
-const PORT = 8080;
+const PORT = 8088;
 const HOST = '0.0.0.0';
 const OS = require('os');
-const ENV = 'DEV';
+const ENV = 'UNITY-XCITE';
 
 
 // App
 const app = express();
 app.get('/', (req, res) => {
   res.statusCode = 200;
-  const msg = 'Hello from from Primus Learning, this was awesome';
+  const msg = 'Hello from XCite, lets keep testing';
   res.send(getPage(msg));
 });
 
@@ -43,7 +43,7 @@ function getPage(message) {
     + "}\n"
     + "\n"
     + ".bgimg {\n"
-    + "  background-image: url('https://www.w3schools.com/w3images/forestbridge.jpg');\n"
+    + "  background-image: url('https://www.w3schools.com/w3images/lights.jpg');\n"
     + "  height: 100%;\n"
     + "  background-position: center;\n"
     + "  background-size: cover;\n"
