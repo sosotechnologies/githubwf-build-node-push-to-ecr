@@ -1,19 +1,18 @@
 #!/bin/bash
 
+# Check if VERSION file exists
+if [ ! -f VERSION ]; then
+  echo "1.0" > VERSION
+fi
+
 # Read the current version
-version=$(cat VERSION)
+current_version=$(cat VERSION)
 
-# Split the version into its components
-major=$(echo $version | cut -d. -f1)
-minor=$(echo $version | cut -d. -f2)
-patch=$(echo $version | cut -d. -f3)
-
-# Increment the patch version
-new_patch=$((patch + 1))
-new_version="$major.$minor.$new_patch"
+# Increment the version number
+IFS='.' read -r -a version_parts <<< "$current_version"
+version_parts[1]=$((version_parts[1] + 1))
+new_version="${version_parts[0]}.${version_parts[1]}"
 
 # Write the new version back to the VERSION file
 echo $new_version > VERSION
-
-# Output the new version
-echo "New version: $new_version"
+echo $new_version
