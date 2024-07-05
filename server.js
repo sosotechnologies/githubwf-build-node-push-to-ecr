@@ -19,7 +19,7 @@ const ENV = 'UNITY-XCITE';
 const app = express();
 app.get('/', (req, res) => {
   res.statusCode = 200;
-  const msg = 'Hello from XCite, lets keep it xxitin';
+  const msg = 'Hello from XCite, let us keep it xxitin';
   res.send(getPage(msg));
 });
 
