@@ -5,4 +5,4 @@ resources:
 
 images:
   - name: ghcr.io/sosotechnologies/node-app
-    newTag: latest # This will be updated in the pipeline
+    newTag:  # This will be updated in the pipeline
