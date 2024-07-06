@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: node-app
+  labels:
+    app: node-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: node-app
@@ -13,7 +15,7 @@ spec:
         app: node-app
     spec:
       containers:
-      - name: node-app
-        image: ghcr.io/sosotechnologies/githubwf-build-node-push-to-ecr/node-app:PLACEHOLDER_VERSION
-        ports:
-        - containerPort: 8088
+        - name: node-app
+          image: ghcr.io/sosotechnologies/node-app:latest
+          ports:
+            - containerPort: 8088
