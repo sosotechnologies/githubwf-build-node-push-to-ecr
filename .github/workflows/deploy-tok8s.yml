@@ -73,11 +73,12 @@ jobs:
     - name: Update Kustomize version
       run: |
         new_version=${{ needs.build.outputs.new_version }}
-        sed -i "s/PLACEHOLDER_VERSION/${new_version}/g" kubernetes/kustomization.yaml
+        sed -i "s/PLACEHOLDER_VERSION/${new_version}/g kubernetes/kustomization.yaml
         git config --global user.name 'sosotechnologies'
         git config --global user.email 'sosotech2000@gmail.com'
         git add kubernetes/kustomization.yaml
         git commit -m "Update Kustomize version to $new_version" || echo "No changes to commit"
+        git pull --rebase origin main
         git push origin main
 
     - name: Deploy to Argo CD
