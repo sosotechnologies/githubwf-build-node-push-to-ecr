@@ -19,14 +19,14 @@ jobs:
       run: |
         chmod +x build-push-to-gh/bump_version.sh && ./build-push-to-gh/bump_version.sh
         new_version=$(cat VERSION-GH)
-        echo "::set-output name=new_version::$new_version"
+        echo "new_version=$new_version" >> $GITHUB_ENV
 
     - name: Commit new version
       run: |
         git config --global user.name 'sosotechnologies'
         git config --global user.email 'sosotech2000@gmail.com'
         git add VERSION-GH
-        git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}" || echo "No changes to commit"
+        git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
         git stash
         git pull --rebase origin main
         git stash pop || echo "No stashed changes"
@@ -35,12 +35,12 @@ jobs:
     - name: Build the Docker image
       run: |
         cd build-push-to-gh
-        docker build -t ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }} .
+        docker build -t ghcr.io/${{ github.repository }}/node-app:${{ env.new_version }} .
 
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: 'ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }}'
+        image-ref: 'ghcr.io/${{ github.repository }}/node-app:${{ env.new_version }}'
         format: 'table'
         exit-code: '0'
         ignore-unfixed: true
@@ -57,8 +57,8 @@ jobs:
     - name: Push the Docker image to GitHub Container Registry
       run: |
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        docker push ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }}
-        docker tag ghcr.io/${{ github.repository }}/node-app:${{ steps.bump_version.outputs.new_version }} ghcr.io/${{ github.repository }}/node-app:latest
+        docker push ghcr.io/${{ github.repository }}/node-app:${{ env.new_version }}
+        docker tag ghcr.io/${{ github.repository }}/node-app:${{ env.new_version }} ghcr.io/${{ github.repository }}/node-app:latest
         docker push ghcr.io/${{ github.repository }}/node-app:latest
 
   deploy:
@@ -72,7 +72,7 @@ jobs:
 
     - name: Update Kustomize version
       run: |
-        new_version=${{ needs.build.outputs.new_version }}
+        new_version=${{ env.new_version }}
         sed -i "s/PLACEHOLDER_VERSION/${new_version}/g kubernetes/kustomization.yaml
         git config --global user.name 'sosotechnologies'
         git config --global user.email 'sosotech2000@gmail.com'
