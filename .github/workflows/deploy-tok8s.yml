@@ -22,11 +22,11 @@ jobs:
         new_version=$(cat VERSION-GH)
         echo "new_version=$new_version" >> $GITHUB_ENV
 
-    - name: Commit new version
+    - name: Commit new version and updated WorkflowTemplate.yaml
       run: |
         git config --global user.name 'sosotechnologies'
         git config --global user.email 'sosotech2000@gmail.com'
-        git add VERSION-GH
+        git add VERSION-GH build-push-to-gh/WorkflowTemplate.yaml
         git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
         git stash
         git pull --rebase origin main
@@ -71,29 +71,8 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Update Kustomize version
-      run: |
-        sed -i "s/latest/${{ env.new_version }}/g" kubernetes/kustomization.yaml
-        git config --global user.name 'sosotechnologies'
-        git config --global user.email 'sosotech2000@gmail.com'
-        git add kubernetes/kustomization.yaml
-        git commit -m "Update Kustomize version to ${{ env.new_version }}" || echo "No changes to commit"
-        git pull --rebase origin main
-        git push origin main
+    - name: Check VERSION-GH file content
+      run: cat VERSION-GH
 
-    - name: Deploy to Argo CD
-      run: |
-        ARGO_CD_TOKEN=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"username\":\"${{ secrets.ARGO_CD_USERNAME }}\",\"password\":\"${{ secrets.ARGO_CD_PASSWORD }}\"}" https://localhost:8080/api/v1/session | jq -r .token)
-        curl -X POST https://localhost:8080/api/v1/applications/node-app/sync \
-        -H "Authorization: Bearer $ARGO_CD_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-              "revision": "main",
-              "prune": false,
-              "dryRun": false,
-              "strategy": {
-                "hook": {
-                  "force": true
-                }
-              }
-            }'
+    - name: Print WorkflowTemplate.yaml before update
+      run: cat build-push-to-gh/WorkflowTemplate.yaml
