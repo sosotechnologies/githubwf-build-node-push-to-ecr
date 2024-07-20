@@ -17,8 +17,8 @@ jobs:
     - name: Bump version
       id: bump_version
       run: |
-        chmod +x githubwf-build-node-push-to-ecr-n-hg/bump_version.sh
-        ./githubwf-build-node-push-to-ecr-n-hg/bump_version.sh
+        chmod +x build-push-to-gh/bump_version.sh
+        ./build-push-to-gh/bump_version.sh
         new_version=$(cat VERSION-GH)
         echo "new_version=$new_version" >> $GITHUB_ENV
 
@@ -26,7 +26,7 @@ jobs:
       run: |
         git config --global user.name 'sosotechnologies'
         git config --global user.email 'sosotech2000@gmail.com'
-        git add VERSION-GH githubwf-build-node-push-to-ecr-n-hg/WorkflowTemplate.yaml
+        git add VERSION-GH build-push-to-gh/WorkflowTemplate.yaml
         git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
         git stash
         git pull --rebase origin main
@@ -35,7 +35,7 @@ jobs:
 
     - name: Build the Docker image
       run: |
-        cd githubwf-build-node-push-to-ecr-n-hg
+        cd build-push-to-gh
         docker build -t ghcr.io/${{ github.repository }}/node-app:${{ env.new_version }} .
 
     - name: Run Trivy vulnerability scanner
@@ -47,13 +47,13 @@ jobs:
         ignore-unfixed: true
         vuln-type: 'os,library'
         severity: 'MEDIUM,HIGH,CRITICAL'
-        output: 'githubwf-build-node-push-to-ecr-n-hg/trivy-report.txt'
+        output: 'build-push-to-gh/trivy-report.txt'
 
     - name: Package Trivy report
       uses: actions/upload-artifact@v3
       with:
         name: trivy-report
-        path: githubwf-build-node-push-to-ecr-n-hg/trivy-report.txt
+        path: build-push-to-gh/trivy-report.txt
 
     - name: Push the Docker image to GitHub Container Registry
       run: |
@@ -75,4 +75,4 @@ jobs:
       run: cat VERSION-GH
 
     - name: Print kubernetes/deployment.yaml before update
-      run: cat githubwf-build-node-push-to-ecr-n-hg/kubernetes/deployment.yaml
+      run: cat kubernetes/deployment.yaml
